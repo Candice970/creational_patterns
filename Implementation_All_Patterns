@@ -1,0 +1,242 @@
+from datetime import datetime
+from typing import List
+
+# -------------------- Product --------------------
+class Product:
+    def __init__(self, product_id: str, name: str, price: float):
+        self._product_id = product_id
+        self._name = name
+        self._price = price
+
+    @property
+    def product_id(self):
+        return self._product_id
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def price(self):
+        return self._price
+
+# -------------------- Category --------------------
+class Category:
+    def __init__(self, category_id: str, name: str):
+        self._category_id = category_id
+        self._name = name
+        self._products: List[Product] = []
+
+    def add_product(self, product: Product):
+        self._products.append(product)
+
+    def remove_product(self, product: Product):
+        self._products.remove(product)
+
+# -------------------- Supplier --------------------
+class Supplier:
+    def __init__(self, supplier_id: str, name: str, contact_info: str):
+        self._supplier_id = supplier_id
+        self._name = name
+        self._contact_info = contact_info
+        self._products: List[Product] = []
+
+    def supply_product(self, product: Product):
+        self._products.append(product)
+
+# -------------------- Order --------------------
+class Order:
+    def __init__(self, order_id: str, date: str, status: str):
+        self._order_id = order_id
+        self._date = date
+        self._status = status
+        self._products: List[Product] = []
+
+    def place_order(self, products: List[Product]):
+        self._products.extend(products)
+        self._status = "Placed"
+
+    def cancel_order(self):
+        self._status = "Cancelled"
+        self._products.clear()
+
+    @property
+    def total_amount(self):
+        return sum(product.price for product in self._products)
+
+# -------------------- User --------------------
+class User:
+    def __init__(self, user_id: str, name: str, role: str):
+        self._user_id = user_id
+        self._name = name
+        self._role = role
+        self._orders: List[Order] = []
+
+    def login(self) -> bool:
+        return True  # Simulate login logic
+
+    def place_order(self, order: Order):
+        self._orders.append(order)
+
+# -------------------- InventoryLog --------------------
+class InventoryLog:
+    def __init__(self, log_id: str, action: str, product_id: str):
+        self._log_id = log_id
+        self._timestamp = datetime.now()
+        self._action = action
+        self._product_id = product_id
+
+    def record_action(self):
+        print(f"[{self._timestamp}] Action: {self._action} on Product ID: {self._product_id}")
+
+
+# -------------------- Simple Factory --------------------
+class Vehicle:
+    def drive(self):
+        pass
+
+class Car(Vehicle):
+    def drive(self):
+        return "Driving a car"
+
+class Bike(Vehicle):
+    def drive(self):
+        return "Riding a bike"
+
+class Truck(Vehicle):
+    def drive(self):
+        return "Driving a truck"
+
+class VehicleFactory:
+    @staticmethod
+    def get_vehicle(vehicle_type: str) -> Vehicle:
+        if vehicle_type == "car":
+            return Car()
+        elif vehicle_type == "bike":
+            return Bike()
+        elif vehicle_type == "truck":
+            return Truck()
+        else:
+            raise ValueError("Invalid vehicle type")
+
+
+# -------------------- Factory Method --------------------
+class PaymentProcessor:
+    def process(self):
+        pass
+
+class CreditCardProcessor(PaymentProcessor):
+    def process(self):
+        return "Processing credit card payment"
+
+class PayPalProcessor(PaymentProcessor):
+    def process(self):
+        return "Processing PayPal payment"
+
+class PaymentFactory:
+    @staticmethod
+    def create_processor(method: str) -> PaymentProcessor:
+        if method == "credit":
+            return CreditCardProcessor()
+        elif method == "paypal":
+            return PayPalProcessor()
+        else:
+            raise ValueError("Unsupported payment method")
+
+
+# -------------------- Abstract Factory --------------------
+class Button:
+    def render(self):
+        pass
+
+class WindowsButton(Button):
+    def render(self):
+        return "Rendering Windows Button"
+
+class MacOSButton(Button):
+    def render(self):
+        return "Rendering MacOS Button"
+
+class GUIFactory:
+    def create_button(self) -> Button:
+        pass
+
+class WindowsFactory(GUIFactory):
+    def create_button(self) -> Button:
+        return WindowsButton()
+
+class MacOSFactory(GUIFactory):
+    def create_button(self) -> Button:
+        return MacOSButton()
+
+
+# -------------------- Builder --------------------
+class Pizza:
+    def __init__(self):
+        self.cheese = False
+        self.toppings = []
+
+    def __str__(self):
+        return f"Pizza with {'cheese' if self.cheese else 'no cheese'} and {', '.join(self.toppings)}"
+
+class PizzaBuilder:
+    def __init__(self):
+        self.pizza = Pizza()
+
+    def add_cheese(self):
+        self.pizza.cheese = True
+        return self
+
+    def add_topping(self, topping: str):
+        self.pizza.toppings.append(topping)
+        return self
+
+    def build(self):
+        return self.pizza
+
+
+# -------------------- Prototype --------------------
+import copy
+
+class Shape:
+    def clone(self):
+        return copy.deepcopy(self)
+
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+
+class Rectangle(Shape):
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+class ShapeCache:
+    def __init__(self):
+        self._cache = {}
+
+    def load_cache(self):
+        self._cache["circle"] = Circle(5)
+        self._cache["rectangle"] = Rectangle(4, 6)
+
+    def get_shape(self, shape_type):
+        shape = self._cache.get(shape_type)
+        return shape.clone() if shape else None
+
+
+# -------------------- Singleton --------------------
+class DatabaseConnection:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(DatabaseConnection, cls).__new__(cls)
+            cls._instance.connection = cls._connect()
+        return cls._instance
+
+    @staticmethod
+    def _connect():
+        return "Database connection established"
+
+    def get_connection(self):
+        return self.connection
